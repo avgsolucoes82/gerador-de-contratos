@@ -7,8 +7,8 @@ import subprocess
 import tempfile
 from datetime import datetime
 
-st.set_page_config(page_title="Gerador de Contratos - Ball Park Go", layout="wide")
-st.title("Gerador de Contratos - BALL PARK GO")
+st.set_page_config(page_title="Gerador de Contratos - Ball Park", layout="wide")
+st.title("Gerador de Contratos - BALL PARK")
 
 # ==========================================
 # TRUQUE DE CSS
