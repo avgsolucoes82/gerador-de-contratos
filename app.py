@@ -6,9 +6,11 @@ import os
 import subprocess
 import tempfile
 from datetime import datetime
+import base64
+import streamlit.components.v1 as components
 
-st.set_page_config(page_title="Gerador de Contratos - Ball Park", layout="wide")
-st.title("Gerador de Contratos - BALL PARK")
+st.set_page_config(page_title="Gerador de Contratos - Ball Park Go", layout="wide")
+st.title("Gerador de Contratos - BALL PARK GO")
 
 # ==========================================
 # TRUQUE DE CSS
@@ -144,7 +146,23 @@ st.markdown("### 4. Geração do Contrato")
 
 formato_saida = st.radio("**Escolha o formato do arquivo:**", ["Word (.docx)", "PDF (.pdf)"], horizontal=True)
 
-if st.button("📝 Gerar Contrato", type="primary"):
+# Função para acionar o download automático via JavaScript
+def download_automatico(dados_arquivo, nome_arquivo, mime_type):
+    b64 = base64.b64encode(dados_arquivo).decode()
+    js_codigo = f"""
+        <html>
+            <body>
+                <a id="link_invisivel" href="data:{mime_type};base64,{b64}" download="{nome_arquivo}"></a>
+                <script>
+                    document.getElementById('link_invisivel').click();
+                </script>
+            </body>
+        </html>
+    """
+    components.html(js_codigo, height=0)
+
+
+if st.button("📝 Gerar e Baixar Contrato", type="primary"):
     
     if st.session_state.razao_social == "":
         st.error("Por favor, busque um CNPJ ou preencha os dados do cliente antes de gerar o contrato.")
@@ -160,7 +178,7 @@ if st.button("📝 Gerar Contrato", type="primary"):
             texto_descricao += "."
 
         # Carrega e preenche o Word
-        doc = DocxTemplate("contrato.docx")
+        doc = DocxTemplate("modelo.docx")
         contexto = {
             "CNPJ": st.session_state.cnpj_input,
             "NOME_EMPRESARIAL": st.session_state.razao_social,
@@ -180,22 +198,19 @@ if st.button("📝 Gerar Contrato", type="primary"):
         
         doc.render(contexto)
         
-        # Lógica de Exportação
+        # Lógica de Exportação e Download em 1 Clique
         if formato_saida == "Word (.docx)":
             arquivo_memoria = io.BytesIO()
             doc.save(arquivo_memoria)
-            arquivo_memoria.seek(0)
             
-            st.success("Contrato gerado com sucesso em Word!")
-            st.download_button(
-                label="📥 Baixar Contrato (Word)",
-                data=arquivo_memoria,
-                file_name=f"Contrato_BallPark_{st.session_state.cnpj_input}.docx",
-                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-            )
+            nome_arq = f"Contrato_BallParkGo_{st.session_state.cnpj_input}.docx"
+            mime = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            
+            st.success("Contrato gerado com sucesso! O download começará automaticamente.")
+            download_automatico(arquivo_memoria.getvalue(), nome_arq, mime)
             
         elif formato_saida == "PDF (.pdf)":
-            with st.spinner("Convertendo o arquivo para PDF. Aguarde alguns segundos..."):
+            with st.spinner("Convertendo o arquivo para PDF. O download começará em instantes..."):
                 with tempfile.NamedTemporaryFile(delete=False, suffix=".docx") as tmp_docx:
                     doc.save(tmp_docx.name)
                     caminho_docx = tmp_docx.name
@@ -213,15 +228,14 @@ if st.button("📝 Gerar Contrato", type="primary"):
                     with open(caminho_pdf, "rb") as arquivo_pdf:
                         dados_pdf = arquivo_pdf.read()
                         
-                    st.success("Contrato gerado com sucesso em PDF!")
-                    st.download_button(
-                        label="📥 Baixar Contrato (PDF)",
-                        data=dados_pdf,
-                        file_name=f"Contrato_BallPark_{st.session_state.cnpj_input}.pdf",
-                        mime="application/pdf"
-                    )
+                    nome_arq = f"Contrato_BallParkGo_{st.session_state.cnpj_input}.pdf"
+                    mime = "application/pdf"
+                    
+                    st.success("PDF gerado com sucesso! O download começará automaticamente.")
+                    download_automatico(dados_pdf, nome_arq, mime)
+                    
                 except Exception as e:
-                    st.error("Ocorreu um erro ao converter para PDF. Verifique se o arquivo packages.txt está configurado no GitHub com 'libreoffice' escrito dentro.")
+                    st.error("Ocorreu um erro ao converter para PDF. Verifique se o arquivo packages.txt está configurado.")
                 finally:
                     if os.path.exists(caminho_docx): os.remove(caminho_docx)
                     if os.path.exists(caminho_pdf): os.remove(caminho_pdf)
