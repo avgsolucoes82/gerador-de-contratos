@@ -78,16 +78,22 @@ def buscar_dados_cnpj():
             log_comp += f" - Bairro {dados.get('bairro', '')}"
             
             st.session_state.logradouro = log_comp
-            st.session_state.cep = dados.get("cep", "")
+            
+            # APLICANDO AS MÁSCARAS AQUI ANTES DE MOSTRAR NA TELA:
+            st.session_state.cep = formatar_cep(dados.get("cep", ""))
+            st.session_state.telefone = formatar_telefone(dados.get("ddd_telefone_1", ""))
+            
             st.session_state.municipio = dados.get("municipio", "")
             st.session_state.uf = dados.get("uf", "")
             st.session_state.email = dados.get("email", "")
-            st.session_state.telefone = dados.get("ddd_telefone_1", "")
+            
+            # Se quiser, formata o próprio CNPJ que o usuário digitou
+            st.session_state.cnpj_input = formatar_cnpj(cnpj)
         else:
             st.error("CNPJ não encontrado ou inválido.")
     else:
         st.warning("Por favor, digite um CNPJ antes de buscar.")
-
+        
 # --- SEÇÃO 1: DADOS DO CLIENTE ---
 st.markdown("### 1. Dados do Cliente")
 col_cnpj, col_btn, col_vazio = st.columns([2, 1, 3])
