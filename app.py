@@ -9,8 +9,8 @@ from datetime import datetime
 import base64
 import streamlit.components.v1 as components
 
-st.set_page_config(page_title="Gerador de Contratos - Ball Park Go", layout="wide")
-st.title("Gerador de Contratos - BALL PARK GO")
+st.set_page_config(page_title="Gerador de Contratos - Ball Park", layout="wide")
+st.title("Gerador de Contratos - BALL PARK")
 
 # ==========================================
 # TRUQUE DE CSS
@@ -178,7 +178,7 @@ if st.button("📝 Gerar e Baixar Contrato", type="primary"):
             texto_descricao += "."
 
         # Carrega e preenche o Word
-        doc = DocxTemplate("modelo.docx")
+        doc = DocxTemplate("contrato.docx")
         contexto = {
             "CNPJ": st.session_state.cnpj_input,
             "NOME_EMPRESARIAL": st.session_state.razao_social,
@@ -203,7 +203,7 @@ if st.button("📝 Gerar e Baixar Contrato", type="primary"):
             arquivo_memoria = io.BytesIO()
             doc.save(arquivo_memoria)
             
-            nome_arq = f"Contrato_BallParkGo_{st.session_state.cnpj_input}.docx"
+            nome_arq = f"Contrato_BallPark_{st.session_state.cnpj_input}.docx"
             mime = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
             
             st.success("Contrato gerado com sucesso! O download começará automaticamente.")
@@ -228,7 +228,7 @@ if st.button("📝 Gerar e Baixar Contrato", type="primary"):
                     with open(caminho_pdf, "rb") as arquivo_pdf:
                         dados_pdf = arquivo_pdf.read()
                         
-                    nome_arq = f"Contrato_BallParkGo_{st.session_state.cnpj_input}.pdf"
+                    nome_arq = f"Contrato_BallPark_{st.session_state.cnpj_input}.pdf"
                     mime = "application/pdf"
                     
                     st.success("PDF gerado com sucesso! O download começará automaticamente.")
