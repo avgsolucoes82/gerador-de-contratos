@@ -23,8 +23,13 @@ if st.button("Buscar e Gerar Contrato"):
             # Aqui dizemos que a tag {{ razao_social }} recebe o dado da API
             contexto = {
                 "razao_social": dados_empresa.get("razao_social"),
-                "cnpj": dados_empresa.get("cnpj"),
-                "logradouro": dados_empresa.get("logradouro")
+                "nome_fantasia": dados_empresa.get("nome_fantasia"),
+                "cnpj": dados_empresa.get("cnpj"),                                
+                "logradouro": dados_empresa.get("logradouro"),
+                "numero": dados_empresa.get("numero"),
+                "complemento": dados_empresa.get("complemento"),
+                "bairro": dados_empresa.get("bairro"),
+                "municipio": dados_empresa.get("municipio")
             }
             
             doc.render(contexto) # Preenche o documento!
