@@ -160,7 +160,7 @@ if st.button("📝 Gerar Contrato", type="primary"):
             texto_descricao += "."
 
         # Carrega e preenche o Word
-        doc = DocxTemplate("modelo.docx")
+        doc = DocxTemplate("contrato.docx")
         contexto = {
             "CNPJ": st.session_state.cnpj_input,
             "NOME_EMPRESARIAL": st.session_state.razao_social,
@@ -190,7 +190,7 @@ if st.button("📝 Gerar Contrato", type="primary"):
             st.download_button(
                 label="📥 Baixar Contrato (Word)",
                 data=arquivo_memoria,
-                file_name=f"Contrato_BallParkGo_{st.session_state.cnpj_input}.docx",
+                file_name=f"Contrato_BallPark_{st.session_state.cnpj_input}.docx",
                 mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
             )
             
@@ -217,7 +217,7 @@ if st.button("📝 Gerar Contrato", type="primary"):
                     st.download_button(
                         label="📥 Baixar Contrato (PDF)",
                         data=dados_pdf,
-                        file_name=f"Contrato_BallParkGo_{st.session_state.cnpj_input}.pdf",
+                        file_name=f"Contrato_BallPark_{st.session_state.cnpj_input}.pdf",
                         mime="application/pdf"
                     )
                 except Exception as e:
