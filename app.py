@@ -34,6 +34,32 @@ if "razao_social" not in st.session_state:
         "cep": "", "municipio": "", "uf": "", "email": "", "telefone": ""
     })
 
+# ==========================================
+# FUNÇÕES DE FORMATAÇÃO (Máscaras)
+# ==========================================
+def formatar_cnpj(cnpj):
+    cnpj_limpo = ''.join(filter(str.isdigit, str(cnpj)))
+    if len(cnpj_limpo) == 14:
+        return f"{cnpj_limpo[:2]}.{cnpj_limpo[2:5]}.{cnpj_limpo[5:8]}/{cnpj_limpo[8:12]}-{cnpj_limpo[12:]}"
+    return cnpj
+
+def formatar_cep(cep):
+    cep_limpo = ''.join(filter(str.isdigit, str(cep)))
+    if len(cep_limpo) == 8:
+        return f"{cep_limpo[:5]}-{cep_limpo[5:]}"
+    return cep
+
+def formatar_telefone(telefone):
+    tel_limpo = ''.join(filter(str.isdigit, str(telefone)))
+    if len(tel_limpo) == 11: # Celular (com nono dígito)
+        return f"({tel_limpo[:2]}) {tel_limpo[2:7]}-{tel_limpo[7:]}"
+    elif len(tel_limpo) == 10: # Fixo
+        return f"({tel_limpo[:2]}) {tel_limpo[2:6]}-{tel_limpo[6:]}"
+    return telefone
+
+# ==========================================
+# FUNÇÃO DE BUSCA NA API
+# ==========================================
 def buscar_dados_cnpj():
     cnpj = st.session_state.cnpj_input.replace(".", "").replace("/", "").replace("-", "")
     
@@ -146,7 +172,6 @@ st.markdown("### 4. Geração do Contrato")
 
 formato_saida = st.radio("**Escolha o formato do arquivo:**", ["Word (.docx)", "PDF (.pdf)"], horizontal=True)
 
-# Função para acionar o download automático via JavaScript
 def download_automatico(dados_arquivo, nome_arquivo, mime_type):
     b64 = base64.b64encode(dados_arquivo).decode()
     js_codigo = f"""
@@ -179,16 +204,18 @@ if st.button("📝 Gerar e Baixar Contrato", type="primary"):
 
         # Carrega e preenche o Word
         doc = DocxTemplate("contrato.docx")
+        
+        # O Dicionário injeta as formatações criadas
         contexto = {
-            "CNPJ": st.session_state.cnpj_input,
+            "CNPJ": formatar_cnpj(st.session_state.cnpj_input),
             "NOME_EMPRESARIAL": st.session_state.razao_social,
             "NOME_FANTASIA": st.session_state.nome_fantasia,
             "LOGRADOURO": st.session_state.logradouro,
-            "CEP": st.session_state.cep,
+            "CEP": formatar_cep(st.session_state.cep),
             "MUNICIPIO": st.session_state.municipio,
             "UF": st.session_state.uf,
             "EMAIL": st.session_state.email,
-            "TELEFONE": st.session_state.telefone,
+            "TELEFONE": formatar_telefone(st.session_state.telefone),
             "VALOR_TOTAL": valor_total,
             "VALOR_ENTRADA": valor_entrada,
             "VALOR_SEGUNDA_PARCELA": valor_segunda,
@@ -198,12 +225,14 @@ if st.button("📝 Gerar e Baixar Contrato", type="primary"):
         
         doc.render(contexto)
         
-        # Lógica de Exportação e Download em 1 Clique
+        # Garante que o nome do arquivo tenha o CNPJ apenas com números, sem barras, para não gerar erro no Windows/Mac
+        cnpj_arquivo = ''.join(filter(str.isdigit, str(st.session_state.cnpj_input)))
+        
         if formato_saida == "Word (.docx)":
             arquivo_memoria = io.BytesIO()
             doc.save(arquivo_memoria)
             
-            nome_arq = f"Contrato_BallPark_{st.session_state.cnpj_input}.docx"
+            nome_arq = f"Contrato_BallPark_{cnpj_arquivo}.docx"
             mime = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
             
             st.success("Contrato gerado com sucesso! O download começará automaticamente.")
@@ -228,7 +257,7 @@ if st.button("📝 Gerar e Baixar Contrato", type="primary"):
                     with open(caminho_pdf, "rb") as arquivo_pdf:
                         dados_pdf = arquivo_pdf.read()
                         
-                    nome_arq = f"Contrato_BallPark_{st.session_state.cnpj_input}.pdf"
+                    nome_arq = f"Contrato_BallPark_{cnpj_arquivo}.pdf"
                     mime = "application/pdf"
                     
                     st.success("PDF gerado com sucesso! O download começará automaticamente.")
