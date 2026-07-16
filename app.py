@@ -25,11 +25,15 @@ if st.button("Buscar e Gerar Contrato"):
                 "razao_social": dados_empresa.get("razao_social"),
                 "nome_fantasia": dados_empresa.get("nome_fantasia"),
                 "cnpj": dados_empresa.get("cnpj"),                                
+                "data_inicio_atividade": dados_empresa.get("data_inicio_atividade"),
+                "descricao_situacao_cadastral": dados_empresa.get("descricao_situacao_cadastral"),                
                 "logradouro": dados_empresa.get("logradouro"),
                 "numero": dados_empresa.get("numero"),
                 "complemento": dados_empresa.get("complemento"),
                 "bairro": dados_empresa.get("bairro"),
-                "municipio": dados_empresa.get("municipio")
+                "municipio": dados_empresa.get("municipio"),
+                "uf": dados_empresa.get("uf"),
+                "cep": dados_empresa.get("cep")
             }
             
             doc.render(contexto) # Preenche o documento!
