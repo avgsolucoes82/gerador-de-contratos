@@ -7,8 +7,21 @@ import subprocess
 import tempfile
 from datetime import datetime
 
-st.set_page_config(page_title="Gerador de Contratos - Ball Park", layout="wide")
-st.title("Gerador de Contratos - BALL PARK")
+st.set_page_config(page_title="Gerador de Contratos - Ball Park Go", layout="wide")
+st.title("Gerador de Contratos - BALL PARK GO")
+
+# ==========================================
+# TRUQUE DE CSS
+# Deixa em negrito os textos digitados em caixas de texto e número
+# ==========================================
+st.markdown("""
+    <style>
+    div[data-testid="stTextInput"] input,
+    div[data-testid="stNumberInput"] input {
+        font-weight: bold;
+    }
+    </style>
+""", unsafe_allow_html=True)
 
 # ==========================================
 # INICIALIZAÇÃO DA MEMÓRIA
@@ -49,17 +62,6 @@ def buscar_dados_cnpj():
 
 # --- SEÇÃO 1: DADOS DO CLIENTE ---
 st.markdown("### 1. Dados do Cliente")
-
-# Truque de CSS para deixar o texto digitado dentro das caixas em negrito
-st.markdown("""
-    <style>
-    div[data-testid="stTextInput"] input {
-        font-weight: bold;
-    }
-    </style>
-""", unsafe_allow_html=True)
-
-# Linha do CNPJ e Botão de Busca
 col_cnpj, col_btn, col_vazio = st.columns([2, 1, 3])
 with col_cnpj:
     st.text_input("**Digite o CNPJ do Comprador (apenas números):**", key="cnpj_input")
@@ -68,7 +70,6 @@ with col_btn:
     st.write("")
     st.button("🔍 Buscar CNPJ", on_click=buscar_dados_cnpj)
 
-# Campos preenchidos automaticamente
 col_rz, col_fant = st.columns(2)
 with col_rz:
     st.text_input("**Razão Social:**", key="razao_social")
@@ -90,28 +91,28 @@ with col_email:
     st.text_input("**E-mail:**", key="email")
 with col_tel:
     st.text_input("**Telefone/WhatsApp:**", key="telefone")
-    
+
 # --- SEÇÃO 2: DADOS FINANCEIROS ---
 st.markdown("### 2. Dados Financeiros")
 col_total, col_entrada, col_parcela = st.columns(3)
 with col_total:
-    valor_total = st.text_input("Valor Total (Ex: 13.200,00):")
+    valor_total = st.text_input("**Valor Total (Ex: 13.200,00):**")
 with col_entrada:
-    valor_entrada = st.text_input("Valor da Entrada (Ex: 6.250,00):")
+    valor_entrada = st.text_input("**Valor da Entrada (Ex: 6.250,00):**")
 with col_parcela:
-    valor_segunda = st.text_input("Valor da 2ª Parcela (Ex: 6.250,00):")
+    valor_segunda = st.text_input("**Valor da 2ª Parcela (Ex: 6.250,00):**")
 
 # --- SEÇÃO 3: COMPOSIÇÃO DO BRINQUEDO ---
 st.markdown("### 3. Especificações e Composição do Brinquedo")
 col_comp, col_larg, col_alt, col_pav = st.columns(4)
 with col_comp:
-    medida_comp = st.text_input("Comprimento (Ex: 6,60m):")
+    medida_comp = st.text_input("**Comprimento (Ex: 6,60m):**")
 with col_larg:
-    medida_larg = st.text_input("Largura (Ex: 3,50m):")
+    medida_larg = st.text_input("**Largura (Ex: 3,50m):**")
 with col_alt:
-    medida_alt = st.text_input("Altura Final (Ex: 3m):")
+    medida_alt = st.text_input("**Altura Final (Ex: 3m):**")
 with col_pav:
-    medida_pav = st.number_input("Nº de Pavimentos:", min_value=1, value=3, step=1)
+    medida_pav = st.number_input("**Nº de Pavimentos:**", min_value=1, value=3, step=1)
 
 lista_atrativos = [
     "escorregador tubular caindo na piscina de bolinhas",
@@ -125,24 +126,23 @@ lista_atrativos = [
     "túnel de fitas"
 ]
 
-itens_selecionados = st.multiselect("Selecione os atrativos e obstáculos que compõem o projeto:", lista_atrativos)
+itens_selecionados = st.multiselect("**Selecione os atrativos e obstáculos que compõem o projeto:**", lista_atrativos)
 
 quantidades_itens = {}
 if itens_selecionados:
-    st.write("Informe a quantidade de cada atrativo selecionado:")
+    st.write("**Informe a quantidade de cada atrativo selecionado:**")
     cols_qtd = st.columns(4)
     for i, item in enumerate(itens_selecionados):
         col_atual = cols_qtd[i % 4]
         with col_atual:
-            qtd = st.number_input(f"Qtd: {item.title()}", min_value=1, value=1, key=f"qtd_{item}")
+            qtd = st.number_input(f"**Qtd: {item.title()}**", min_value=1, value=1, key=f"qtd_{item}")
             quantidades_itens[item] = qtd
 
 # --- SEÇÃO 4: GERAÇÃO DO CONTRATO ---
 st.markdown("---")
 st.markdown("### 4. Geração do Contrato")
 
-# O usuário escolhe se quer em Word ou PDF
-formato_saida = st.radio("Escolha o formato do arquivo:", ["Word (.docx)", "PDF (.pdf)"], horizontal=True)
+formato_saida = st.radio("**Escolha o formato do arquivo:**", ["Word (.docx)", "PDF (.pdf)"], horizontal=True)
 
 if st.button("📝 Gerar Contrato", type="primary"):
     
@@ -180,7 +180,7 @@ if st.button("📝 Gerar Contrato", type="primary"):
         
         doc.render(contexto)
         
-        # Lógica de Exportação baseada na escolha do usuário
+        # Lógica de Exportação
         if formato_saida == "Word (.docx)":
             arquivo_memoria = io.BytesIO()
             doc.save(arquivo_memoria)
@@ -195,17 +195,13 @@ if st.button("📝 Gerar Contrato", type="primary"):
             )
             
         elif formato_saida == "PDF (.pdf)":
-            # Mostra um aviso de carregamento pois o PDF demora uns 2 segundos a mais
             with st.spinner("Convertendo o arquivo para PDF. Aguarde alguns segundos..."):
-                
-                # Salva o arquivo temporário no servidor
                 with tempfile.NamedTemporaryFile(delete=False, suffix=".docx") as tmp_docx:
                     doc.save(tmp_docx.name)
                     caminho_docx = tmp_docx.name
                 
                 caminho_pdf = caminho_docx.replace(".docx", ".pdf")
                 
-                # Roda o comando invisível do LibreOffice
                 comando = [
                     "libreoffice", "--headless", "--convert-to", "pdf",
                     "--outdir", os.path.dirname(caminho_pdf), caminho_docx
@@ -214,7 +210,6 @@ if st.button("📝 Gerar Contrato", type="primary"):
                 try:
                     subprocess.run(comando, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
                     
-                    # Lê o PDF gerado
                     with open(caminho_pdf, "rb") as arquivo_pdf:
                         dados_pdf = arquivo_pdf.read()
                         
@@ -226,8 +221,7 @@ if st.button("📝 Gerar Contrato", type="primary"):
                         mime="application/pdf"
                     )
                 except Exception as e:
-                    st.error("Ocorreu um erro ao converter para PDF. Verifique se o arquivo packages.txt está configurado.")
+                    st.error("Ocorreu um erro ao converter para PDF. Verifique se o arquivo packages.txt está configurado no GitHub com 'libreoffice' escrito dentro.")
                 finally:
-                    # Limpa os arquivos temporários para não lotar o servidor do Streamlit
                     if os.path.exists(caminho_docx): os.remove(caminho_docx)
                     if os.path.exists(caminho_pdf): os.remove(caminho_pdf)
