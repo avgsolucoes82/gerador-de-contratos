@@ -49,36 +49,48 @@ def buscar_dados_cnpj():
 
 # --- SEÇÃO 1: DADOS DO CLIENTE ---
 st.markdown("### 1. Dados do Cliente")
+
+# Truque de CSS para deixar o texto digitado dentro das caixas em negrito
+st.markdown("""
+    <style>
+    div[data-testid="stTextInput"] input {
+        font-weight: bold;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
+# Linha do CNPJ e Botão de Busca
 col_cnpj, col_btn, col_vazio = st.columns([2, 1, 3])
 with col_cnpj:
-    st.text_input("Digite o CNPJ do Comprador (apenas números):", key="cnpj_input")
+    st.text_input("**Digite o CNPJ do Comprador (apenas números):**", key="cnpj_input")
 with col_btn:
     st.write("") 
     st.write("")
     st.button("🔍 Buscar CNPJ", on_click=buscar_dados_cnpj)
 
+# Campos preenchidos automaticamente
 col_rz, col_fant = st.columns(2)
 with col_rz:
-    st.text_input("Razão Social:", key="razao_social")
+    st.text_input("**Razão Social:**", key="razao_social")
 with col_fant:
-    st.text_input("Nome Fantasia:", key="nome_fantasia")
+    st.text_input("**Nome Fantasia:**", key="nome_fantasia")
 
 col_log, col_cep = st.columns([3, 1])
 with col_log:
-    st.text_input("Logradouro Completo:", key="logradouro")
+    st.text_input("**Logradouro Completo:**", key="logradouro")
 with col_cep:
-    st.text_input("CEP:", key="cep")
+    st.text_input("**CEP:**", key="cep")
 
 col_mun, col_uf, col_email, col_tel = st.columns(4)
 with col_mun:
-    st.text_input("Município:", key="municipio")
+    st.text_input("**Município:**", key="municipio")
 with col_uf:
-    st.text_input("UF:", key="uf")
+    st.text_input("**UF:**", key="uf")
 with col_email:
-    st.text_input("E-mail:", key="email")
+    st.text_input("**E-mail:**", key="email")
 with col_tel:
-    st.text_input("Telefone/WhatsApp:", key="telefone")
-
+    st.text_input("**Telefone/WhatsApp:**", key="telefone")
+    
 # --- SEÇÃO 2: DADOS FINANCEIROS ---
 st.markdown("### 2. Dados Financeiros")
 col_total, col_entrada, col_parcela = st.columns(3)
