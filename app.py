@@ -146,15 +146,22 @@ with col_pav:
     medida_pav = st.number_input("**Nº de Pavimentos:**", min_value=1, value=3, step=1)
 
 lista_atrativos = [
-    "escorregador tubular caindo na piscina de bolinhas",
-    "piscina de bolinhas em tela",
-    "socão",
-    "bananinhas",
-    "ponte de fitas",
-    "labirinto de fitas",
-    "bolinhas coloridas",
-    "saco de pancada",
-    "túnel de fitas"
+    "Escorregador reto",
+    "Escorregador duplo",
+    "Escorregador tubular",
+    "Piscina de bolinhas",
+    "Pula pula",
+    "Sapateira",
+    "Cavalinho",
+    "Mesinha com cadeiras em MDF",
+    "Cenários",
+    "Cercado com portão",
+    "Socão",
+    "Bananinhas",
+    "Ponte de fitas",
+    "Meia lua",
+    "Labirinto de fitas",
+    "Bolinhas coloridas"
 ]
 
 itens_selecionados = st.multiselect("**Selecione os atrativos e obstáculos que compõem o projeto:**", lista_atrativos)
@@ -166,7 +173,7 @@ if itens_selecionados:
     for i, item in enumerate(itens_selecionados):
         col_atual = cols_qtd[i % 4]
         with col_atual:
-            qtd = st.number_input(f"**Qtd: {item.title()}**", min_value=1, value=1, key=f"qtd_{item}")
+            qtd = st.number_input(f"**Qtd: {item}**", min_value=1, value=1, key=f"qtd_{item}")
             quantidades_itens[item] = qtd
 
 # --- SEÇÃO 4: GERAÇÃO DO CONTRATO ---
