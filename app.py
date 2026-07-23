@@ -89,6 +89,15 @@ def valor_por_extenso(valor_string):
     except ValueError:
         return "Valor inválido"
 
+def data_por_extenso():
+    meses = [
+        "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+        "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+    ]
+    hoje = datetime.now()
+    # Pega o dia (com 2 dígitos), o mês da nossa lista e o ano
+    return f"{hoje.day:02d} de {meses[hoje.month - 1]} de {hoje.year}"
+
 # ==========================================
 # FUNÇÃO DE BUSCA NA API
 # ==========================================
@@ -246,7 +255,7 @@ if st.button("📝 Gerar e Baixar Contrato", type="primary"):
         # Carrega e preenche o Word
         doc = DocxTemplate("contrato.docx")
         
-        # O Dicionário injeta as formatações criadas (com trava anti-None)
+        # O Dicionário injeta as formatações criadas (com trava anti-None e data por extenso)
         contexto = {
             "CNPJ": formatar_cnpj(st.session_state.cnpj_input) or "",
             "NOME_EMPRESARIAL": st.session_state.razao_social or "",
@@ -260,7 +269,7 @@ if st.button("📝 Gerar e Baixar Contrato", type="primary"):
             "VALOR_TOTAL": formatar_moeda(valor_total) or "",
             "VALOR_EXTENSO": valor_por_extenso(valor_total) or "",
             "DESCRICAO_PRODUTO": texto_descricao or "",
-            "DATA_CONTRATO": datetime.now().strftime("%d/%m/%Y")
+            "DATA_CONTRATO": data_por_extenso()  # <--- Nova chamada da função aqui
         }
         
         doc.render(contexto)
