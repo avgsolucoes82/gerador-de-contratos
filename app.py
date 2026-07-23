@@ -39,18 +39,21 @@ if "razao_social" not in st.session_state:
 # FUNÇÕES DE FORMATAÇÃO E CÁLCULO
 # ==========================================
 def formatar_cnpj(cnpj):
+    if not cnpj: return ""
     cnpj_limpo = ''.join(filter(str.isdigit, str(cnpj)))
     if len(cnpj_limpo) == 14:
         return f"{cnpj_limpo[:2]}.{cnpj_limpo[2:5]}.{cnpj_limpo[5:8]}/{cnpj_limpo[8:12]}-{cnpj_limpo[12:]}"
     return cnpj
 
 def formatar_cep(cep):
+    if not cep: return ""
     cep_limpo = ''.join(filter(str.isdigit, str(cep)))
     if len(cep_limpo) == 8:
         return f"{cep_limpo[:5]}-{cep_limpo[5:]}"
     return cep
 
 def formatar_telefone(telefone):
+    if not telefone: return ""
     tel_limpo = ''.join(filter(str.isdigit, str(telefone)))
     if len(tel_limpo) == 11: # Celular (com nono dígito)
         return f"({tel_limpo[:2]}) {tel_limpo[2:7]}-{tel_limpo[7:]}"
@@ -98,23 +101,23 @@ def buscar_dados_cnpj():
         
         if resposta.status_code == 200:
             dados = resposta.json()
-            st.session_state.razao_social = dados.get("razao_social", "")
-            st.session_state.nome_fantasia = dados.get("nome_fantasia", "") or dados.get("razao_social", "")
+            st.session_state.razao_social = dados.get("razao_social") or ""
+            st.session_state.nome_fantasia = dados.get("nome_fantasia") or dados.get("razao_social") or ""
             
-            log_comp = f"{dados.get('logradouro', '')}, {dados.get('numero', '')}"
+            log_comp = f"{dados.get('logradouro') or ''}, {dados.get('numero') or ''}"
             if dados.get('complemento'):
                 log_comp += f", {dados.get('complemento')}"
-            log_comp += f" - Bairro {dados.get('bairro', '')}"
+            log_comp += f" - Bairro {dados.get('bairro') or ''}"
             
             st.session_state.logradouro = log_comp
             
             # APLICANDO AS MÁSCARAS AQUI ANTES DE MOSTRAR NA TELA:
-            st.session_state.cep = formatar_cep(dados.get("cep", ""))
-            st.session_state.telefone = formatar_telefone(dados.get("ddd_telefone_1", ""))
+            st.session_state.cep = formatar_cep(dados.get("cep") or "")
+            st.session_state.telefone = formatar_telefone(dados.get("ddd_telefone_1") or "")
             
-            st.session_state.municipio = dados.get("municipio", "")
-            st.session_state.uf = dados.get("uf", "")
-            st.session_state.email = dados.get("email", "")
+            st.session_state.municipio = dados.get("municipio") or ""
+            st.session_state.uf = dados.get("uf") or ""
+            st.session_state.email = dados.get("email") or ""
             
             # Se quiser, formata o próprio CNPJ que o usuário digitou
             st.session_state.cnpj_input = formatar_cnpj(cnpj)
@@ -243,20 +246,20 @@ if st.button("📝 Gerar e Baixar Contrato", type="primary"):
         # Carrega e preenche o Word
         doc = DocxTemplate("contrato.docx")
         
-        # O Dicionário injeta as formatações criadas
+        # O Dicionário injeta as formatações criadas (com trava anti-None)
         contexto = {
-            "CNPJ": formatar_cnpj(st.session_state.cnpj_input),
-            "NOME_EMPRESARIAL": st.session_state.razao_social,
-            "NOME_FANTASIA": st.session_state.nome_fantasia,
-            "LOGRADOURO": st.session_state.logradouro,
-            "CEP": formatar_cep(st.session_state.cep),
-            "MUNICIPIO": st.session_state.municipio,
-            "UF": st.session_state.uf,
-            "EMAIL": st.session_state.email,
-            "TELEFONE": formatar_telefone(st.session_state.telefone),
-            "VALOR_TOTAL": formatar_moeda(valor_total), # Aplica a formatação de moeda
-            "VALOR_EXTENSO": valor_por_extenso(valor_total),
-            "DESCRICAO_PRODUTO": texto_descricao,
+            "CNPJ": formatar_cnpj(st.session_state.cnpj_input) or "",
+            "NOME_EMPRESARIAL": st.session_state.razao_social or "",
+            "NOME_FANTASIA": st.session_state.nome_fantasia or "",
+            "LOGRADOURO": st.session_state.logradouro or "",
+            "CEP": formatar_cep(st.session_state.cep) or "",
+            "MUNICIPIO": st.session_state.municipio or "",
+            "UF": st.session_state.uf or "",
+            "EMAIL": st.session_state.email or "",
+            "TELEFONE": formatar_telefone(st.session_state.telefone) or "",
+            "VALOR_TOTAL": formatar_moeda(valor_total) or "",
+            "VALOR_EXTENSO": valor_por_extenso(valor_total) or "",
+            "DESCRICAO_PRODUTO": texto_descricao or "",
             "DATA_CONTRATO": datetime.now().strftime("%d/%m/%Y")
         }
         
