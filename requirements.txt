@@ -1,3 +1,4 @@
 streamlit
 requests
 docxtpl
+num2words==0.5.13
