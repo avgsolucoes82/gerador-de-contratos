@@ -128,9 +128,7 @@ with col_tel:
 
 # --- SEÇÃO 2: DADOS FINANCEIROS ---
 st.markdown("### 2. Dados Financeiros")
-col_total, col_entrada, col_parcela = st.columns(3)
-with col_total:
-    valor_total = st.text_input("**Valor Total:**")
+valor_total = st.text_input("**Valor Total (R$):**")
 
 # --- SEÇÃO 3: COMPOSIÇÃO DO BRINQUEDO ---
 st.markdown("### 3. Especificações e Composição do Brinquedo")
@@ -188,7 +186,6 @@ def download_automatico(dados_arquivo, nome_arquivo, mime_type):
     """
     components.html(js_codigo, height=0)
 
-
 if st.button("📝 Gerar e Baixar Contrato", type="primary"):
     
     if st.session_state.razao_social == "":
@@ -219,8 +216,6 @@ if st.button("📝 Gerar e Baixar Contrato", type="primary"):
             "EMAIL": st.session_state.email,
             "TELEFONE": formatar_telefone(st.session_state.telefone),
             "VALOR_TOTAL": valor_total,
-            "VALOR_ENTRADA": valor_entrada,
-            "VALOR_SEGUNDA_PARCELA": valor_segunda,
             "DESCRICAO_PRODUTO": texto_descricao,
             "DATA_CONTRATO": datetime.now().strftime("%d/%m/%Y")
         }
