@@ -132,13 +132,16 @@ valor_total = st.text_input("**Valor Total (R$):**")
 
 # --- SEÇÃO 3: COMPOSIÇÃO DO BRINQUEDO ---
 st.markdown("### 3. Especificações e Composição do Brinquedo")
+
+st.info("ℹ️ Medidas em metros")
+
 col_comp, col_larg, col_alt, col_pav = st.columns(4)
 with col_comp:
-    medida_comp = st.text_input("**Comprimento (Ex: 6,60m):**")
+    medida_comp = st.text_input("**Comprimento:**")
 with col_larg:
-    medida_larg = st.text_input("**Largura (Ex: 3,50m):**")
+    medida_larg = st.text_input("**Largura na parte do Escorregador:**")
 with col_alt:
-    medida_alt = st.text_input("**Altura Final (Ex: 3m):**")
+    medida_alt = st.text_input("**Altura Final:**")
 with col_pav:
     medida_pav = st.number_input("**Nº de Pavimentos:**", min_value=1, value=3, step=1)
 
@@ -191,8 +194,8 @@ if st.button("📝 Gerar e Baixar Contrato", type="primary"):
     if st.session_state.razao_social == "":
         st.error("Por favor, busque um CNPJ ou preencha os dados do cliente antes de gerar o contrato.")
     else:
-        # Monta a descrição
-        texto_descricao = f"Um complexo de Playground infantil “BRINQUEDÃO” contendo as seguintes medidas e especificações: {medida_comp} de comprimento; {medida_larg} de largura, {medida_alt} de altura final, {medida_pav} pavimentos"
+        # Monta a descrição com o "m" adicionado automaticamente
+        texto_descricao = f"Um complexo de Playground infantil “BRINQUEDÃO” contendo as seguintes medidas e especificações: {medida_comp}m de comprimento; {medida_larg}m de largura na parte do escorregador, {medida_alt}m de altura final, {medida_pav} pavimentos"
         
         if quantidades_itens:
             texto_descricao += " com atrativos e obstáculos instalados em pontos aleatórios sendo: "
