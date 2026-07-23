@@ -8,6 +8,7 @@ import tempfile
 from datetime import datetime
 import base64
 import streamlit.components.v1 as components
+from num2words import num2words
 
 st.set_page_config(page_title="Gerador de Contratos - Ball Park", layout="wide")
 st.title("Gerador de Contratos - BALL PARK")
@@ -35,7 +36,7 @@ if "razao_social" not in st.session_state:
     })
 
 # ==========================================
-# FUNÇÕES DE FORMATAÇÃO (Máscaras)
+# FUNÇÕES DE FORMATAÇÃO E CÁLCULO
 # ==========================================
 def formatar_cnpj(cnpj):
     cnpj_limpo = ''.join(filter(str.isdigit, str(cnpj)))
@@ -56,6 +57,20 @@ def formatar_telefone(telefone):
     elif len(tel_limpo) == 10: # Fixo
         return f"({tel_limpo[:2]}) {tel_limpo[2:6]}-{tel_limpo[6:]}"
     return telefone
+
+def valor_por_extenso(valor_string):
+    if not valor_string:
+        return ""
+    try:
+        # Tira o R$, os pontos de milhar e troca a vírgula por ponto para o Python calcular
+        valor_limpo = str(valor_string).replace("R$", "").replace(".", "").replace(",", ".").strip()
+        valor_float = float(valor_limpo)
+        
+        # Converte para extenso usando a regra de moeda brasileira
+        extenso = num2words(valor_float, lang='pt_BR', to='currency')
+        return extenso.capitalize()
+    except ValueError:
+        return "Valor inválido"
 
 # ==========================================
 # FUNÇÃO DE BUSCA NA API
@@ -128,7 +143,7 @@ with col_tel:
 
 # --- SEÇÃO 2: DADOS FINANCEIROS ---
 st.markdown("### 2. Dados Financeiros")
-valor_total = st.text_input("**Valor Total (R$):**")
+valor_total = st.text_input("**Valor Total (Ex: 13.200,00):**")
 
 # --- SEÇÃO 3: COMPOSIÇÃO DO BRINQUEDO ---
 st.markdown("### 3. Especificações e Composição do Brinquedo")
@@ -226,6 +241,7 @@ if st.button("📝 Gerar e Baixar Contrato", type="primary"):
             "EMAIL": st.session_state.email,
             "TELEFONE": formatar_telefone(st.session_state.telefone),
             "VALOR_TOTAL": valor_total,
+            "VALOR_EXTENSO": valor_por_extenso(valor_total),
             "DESCRICAO_PRODUTO": texto_descricao,
             "DATA_CONTRATO": datetime.now().strftime("%d/%m/%Y")
         }
