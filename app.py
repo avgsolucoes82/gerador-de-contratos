@@ -58,6 +58,20 @@ def formatar_telefone(telefone):
         return f"({tel_limpo[:2]}) {tel_limpo[2:6]}-{tel_limpo[6:]}"
     return telefone
 
+def formatar_moeda(valor_string):
+    if not valor_string:
+        return ""
+    try:
+        # Limpa o valor digitado para converter em decimal
+        valor_limpo = str(valor_string).replace("R$", "").replace(".", "").replace(",", ".").strip()
+        valor_float = float(valor_limpo)
+        
+        # Formata no padrão brasileiro (R$ XX.XXX,XX)
+        valor_formatado = f"R$ {valor_float:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+        return valor_formatado
+    except ValueError:
+        return valor_string # Retorna o texto puro caso o usuário digite algo que não seja número
+
 def valor_por_extenso(valor_string):
     if not valor_string:
         return ""
@@ -143,7 +157,7 @@ with col_tel:
 
 # --- SEÇÃO 2: DADOS FINANCEIROS ---
 st.markdown("### 2. Dados Financeiros")
-valor_total = st.text_input("**Valor Total (Ex: 13.200,00):**")
+valor_total = st.text_input("**Valor Total:**")
 
 # --- SEÇÃO 3: COMPOSIÇÃO DO BRINQUEDO ---
 st.markdown("### 3. Especificações e Composição do Brinquedo")
@@ -240,7 +254,7 @@ if st.button("📝 Gerar e Baixar Contrato", type="primary"):
             "UF": st.session_state.uf,
             "EMAIL": st.session_state.email,
             "TELEFONE": formatar_telefone(st.session_state.telefone),
-            "VALOR_TOTAL": valor_total,
+            "VALOR_TOTAL": formatar_moeda(valor_total), # Aplica a formatação de moeda
             "VALOR_EXTENSO": valor_por_extenso(valor_total),
             "DESCRICAO_PRODUTO": texto_descricao,
             "DATA_CONTRATO": datetime.now().strftime("%d/%m/%Y")
