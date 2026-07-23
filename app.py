@@ -130,11 +130,7 @@ with col_tel:
 st.markdown("### 2. Dados Financeiros")
 col_total, col_entrada, col_parcela = st.columns(3)
 with col_total:
-    valor_total = st.text_input("**Valor Total (Ex: 13.200,00):**")
-with col_entrada:
-    valor_entrada = st.text_input("**Valor da Entrada (Ex: 6.250,00):**")
-with col_parcela:
-    valor_segunda = st.text_input("**Valor da 2ª Parcela (Ex: 6.250,00):**")
+    valor_total = st.text_input("**Valor Total:**")
 
 # --- SEÇÃO 3: COMPOSIÇÃO DO BRINQUEDO ---
 st.markdown("### 3. Especificações e Composição do Brinquedo")
