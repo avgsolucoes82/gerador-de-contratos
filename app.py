@@ -66,25 +66,19 @@ def formatar_moeda(valor_string):
     if not valor_string:
         return ""
     try:
-        # Limpa o valor digitado para converter em decimal
         valor_limpo = str(valor_string).replace("R$", "").replace(".", "").replace(",", ".").strip()
         valor_float = float(valor_limpo)
-        
-        # Formata no padrão brasileiro (R$ XX.XXX,XX)
         valor_formatado = f"R$ {valor_float:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
         return valor_formatado
     except ValueError:
-        return valor_string # Retorna o texto puro caso o usuário digite algo que não seja número
+        return valor_string 
 
 def valor_por_extenso(valor_string):
     if not valor_string:
         return ""
     try:
-        # Tira o R$, os pontos de milhar e troca a vírgula por ponto para o Python calcular
         valor_limpo = str(valor_string).replace("R$", "").replace(".", "").replace(",", ".").strip()
         valor_float = float(valor_limpo)
-        
-        # Converte para extenso usando a regra de moeda brasileira
         extenso = num2words(valor_float, lang='pt_BR', to='currency')
         return extenso.capitalize()
     except ValueError:
@@ -96,7 +90,6 @@ def data_por_extenso():
         "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
     ]
     hoje = datetime.now()
-    # Pega o dia (com 2 dígitos), o mês da nossa lista e o ano
     return f"{hoje.day:02d} de {meses[hoje.month - 1]} de {hoje.year}"
 
 # ==========================================
@@ -121,7 +114,6 @@ def buscar_dados_cnpj():
             
             st.session_state.logradouro = log_comp
             
-            # APLICANDO AS MÁSCARAS AQUI ANTES DE MOSTRAR NA TELA:
             st.session_state.cep = formatar_cep(dados.get("cep") or "")
             st.session_state.telefone = formatar_telefone(dados.get("ddd_telefone_1") or "")
             
@@ -129,7 +121,6 @@ def buscar_dados_cnpj():
             st.session_state.uf = dados.get("uf") or ""
             st.session_state.email = dados.get("email") or ""
             
-            # Se quiser, formata o próprio CNPJ que o usuário digitou
             st.session_state.cnpj_input = formatar_cnpj(cnpj)
         else:
             st.error("CNPJ não encontrado ou inválido.")
@@ -171,17 +162,47 @@ with col_tel:
 # --- SEÇÃO 2: CONDIÇÕES COMERCIAIS ---
 st.markdown("### 2. Condições Comerciais")
 
-# Primeira linha: Valores e Pagamento dividindo a tela
-col_valor, col_pag = st.columns(2)
+# Primeira linha: Preço e Prazo
+col_valor, col_prazo = st.columns(2)
 with col_valor:
-    valor_total = st.text_input("**Preço Total:**") # <--- ALTERAÇÃO FEITA AQUI
-with col_pag:
-    condicoes_pagamento = st.text_area("**Condições de Pagamento:**", placeholder="Descreva as formas e condições de pagamento...")
+    valor_total = st.text_input("**Preço Total:**") 
+with col_prazo:
+    prazo_entrega = st.number_input("**Prazo de entrega (em dias úteis):**", min_value=1, value=30, step=1)
 
-st.markdown("<br>", unsafe_allow_html=True) # Adiciona um pequeno espaço em branco para separar visualmente
+st.markdown("#### Configuração de Pagamento")
+col_tipo, col_meio = st.columns(2)
+with col_tipo:
+    tipo_pagamento = st.radio("**Modalidade:**", ["À vista", "Parcelado"], horizontal=True)
+with col_meio:
+    meio_pagamento = st.selectbox("**Meio de Pagamento:**", ["PIX", "Boleto", "Cartão de Crédito"])
 
-# Segunda linha: Prazo de Entrega (ocupa a tela toda, mas fica isolado dos valores)
-prazo_entrega = st.number_input("**Prazo de entrega (em dias úteis):**", min_value=1, value=30, step=1)
+# Lógica condicional dinâmica para o texto
+texto_gerado_pagamento = ""
+
+if tipo_pagamento == "À vista":
+    if valor_total:
+        texto_gerado_pagamento = f"Pagamento à vista no valor de {formatar_moeda(valor_total)}, a ser realizado via {meio_pagamento}."
+    else:
+        texto_gerado_pagamento = f"Pagamento à vista no valor total do contrato, a ser realizado via {meio_pagamento}."
+else:
+    col_ent, col_qtd, col_parc = st.columns(3)
+    with col_ent:
+        valor_entrada = st.text_input("**Valor da Entrada:**", key="entrada")
+    with col_qtd:
+        qtd_parcelas = st.number_input("**Nº de Parcelas:**", min_value=1, value=1, step=1)
+    with col_parc:
+        valor_parcela = st.text_input("**Valor da Parcela:**", key="parcela")
+    
+    entrada_fmt = formatar_moeda(valor_entrada) if valor_entrada else "[VALOR DA ENTRADA]"
+    parcela_fmt = formatar_moeda(valor_parcela) if valor_parcela else "[VALOR DA PARCELA]"
+    
+    texto_gerado_pagamento = f"Pagamento parcelado, sendo uma entrada no valor de {entrada_fmt} e o saldo remanescente dividido em {qtd_parcelas} parcela(s) de {parcela_fmt}, a serem pagos via {meio_pagamento}."
+
+st.markdown("<br>", unsafe_allow_html=True)
+st.info("💡 O texto abaixo foi gerado automaticamente, mas você pode editá-lo livremente antes de gerar o contrato.")
+
+# Caixa de texto final, preenchida pelo texto gerado, mas editável pelo usuário
+condicoes_pagamento = st.text_area("**Texto Final das Condições de Pagamento:**", value=texto_gerado_pagamento, height=100)
 
 # --- SEÇÃO 3: COMPOSIÇÃO DO BRINQUEDO ---
 st.markdown("### 3. Especificações e Composição do Brinquedo")
@@ -254,7 +275,6 @@ if st.button("📝 Gerar e Baixar Contrato", type="primary"):
     if st.session_state.razao_social == "":
         st.error("Por favor, busque um CNPJ ou preencha os dados do cliente antes de gerar o contrato.")
     else:
-        # Monta a descrição com o "m" adicionado automaticamente
         texto_descricao = f"Um complexo de Playground infantil “BRINQUEDÃO” contendo as seguintes medidas e especificações: {medida_comp}m de comprimento; {medida_larg}m de largura na parte do escorregador, {medida_alt}m de altura final, {medida_pav} pavimentos"
         
         if quantidades_itens:
@@ -264,10 +284,8 @@ if st.button("📝 Gerar e Baixar Contrato", type="primary"):
         else:
             texto_descricao += "."
 
-        # Carrega e preenche o Word
         doc = DocxTemplate("contrato.docx")
         
-        # O Dicionário injeta as formatações criadas (com trava anti-None e data por extenso)
         contexto = {
             "CNPJ": formatar_cnpj(st.session_state.cnpj_input) or "",
             "NOME_EMPRESARIAL": st.session_state.razao_social or "",
@@ -288,7 +306,6 @@ if st.button("📝 Gerar e Baixar Contrato", type="primary"):
         
         doc.render(contexto)
         
-        # Garante que o nome do arquivo tenha o CNPJ apenas com números, sem barras, para não gerar erro no Windows/Mac
         cnpj_arquivo = ''.join(filter(str.isdigit, str(st.session_state.cnpj_input)))
         
         if formato_saida == "Word (.docx)":
