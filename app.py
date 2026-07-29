@@ -20,7 +20,8 @@ st.title("Gerador de Contratos - BALL PARK")
 st.markdown("""
     <style>
     div[data-testid="stTextInput"] input,
-    div[data-testid="stNumberInput"] input {
+    div[data-testid="stNumberInput"] input,
+    div[data-testid="stTextArea"] textarea {
         font-weight: bold;
     }
     </style>
@@ -167,9 +168,20 @@ with col_email:
 with col_tel:
     st.text_input("**Telefone/WhatsApp:**", key="telefone")
 
-# --- SEÇÃO 2: DADOS FINANCEIROS ---
-st.markdown("### 2. Dados Financeiros")
-valor_total = st.text_input("**Valor Total:**")
+# --- SEÇÃO 2: CONDIÇÕES COMERCIAIS ---
+st.markdown("### 2. Condições Comerciais")
+
+# Primeira linha: Valores e Pagamento dividindo a tela
+col_valor, col_pag = st.columns(2)
+with col_valor:
+    valor_total = st.text_input("**Valor Total:**")
+with col_pag:
+    condicoes_pagamento = st.text_area("**Condições de Pagamento:**", placeholder="Descreva as formas e condições de pagamento...")
+
+st.markdown("<br>", unsafe_allow_html=True) # Adiciona um pequeno espaço em branco para separar visualmente
+
+# Segunda linha: Prazo de Entrega (ocupa a tela toda, mas fica isolado dos valores)
+prazo_entrega = st.number_input("**Prazo de entrega (em dias úteis):**", min_value=1, value=30, step=1)
 
 # --- SEÇÃO 3: COMPOSIÇÃO DO BRINQUEDO ---
 st.markdown("### 3. Especificações e Composição do Brinquedo")
@@ -268,8 +280,10 @@ if st.button("📝 Gerar e Baixar Contrato", type="primary"):
             "TELEFONE": formatar_telefone(st.session_state.telefone) or "",
             "VALOR_TOTAL": formatar_moeda(valor_total) or "",
             "VALOR_EXTENSO": valor_por_extenso(valor_total) or "",
+            "CONDICOES_PAGAMENTO": condicoes_pagamento or "",
+            "PRAZO_ENTREGA": str(prazo_entrega),
             "DESCRICAO_PRODUTO": texto_descricao or "",
-            "DATA_CONTRATO": data_por_extenso()  # <--- Nova chamada da função aqui
+            "DATA_CONTRATO": data_por_extenso() 
         }
         
         doc.render(contexto)
