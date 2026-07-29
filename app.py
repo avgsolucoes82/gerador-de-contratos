@@ -174,7 +174,7 @@ st.markdown("### 2. Condições Comerciais")
 # Primeira linha: Valores e Pagamento dividindo a tela
 col_valor, col_pag = st.columns(2)
 with col_valor:
-    valor_total = st.text_input("**Valor Total:**")
+    valor_total = st.text_input("**Preço Total:**") # <--- ALTERAÇÃO FEITA AQUI
 with col_pag:
     condicoes_pagamento = st.text_area("**Condições de Pagamento:**", placeholder="Descreva as formas e condições de pagamento...")
 
