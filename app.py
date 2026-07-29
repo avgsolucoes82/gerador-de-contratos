@@ -1,6 +1,7 @@
 import streamlit as st
 import requests
-from docxtpl import DocxTemplate
+from docxtpl import DocxTemplate, InlineImage
+from docx.shared import Mm
 import io
 import os
 import subprocess
@@ -56,9 +57,9 @@ def formatar_cep(cep):
 def formatar_telefone(telefone):
     if not telefone: return ""
     tel_limpo = ''.join(filter(str.isdigit, str(telefone)))
-    if len(tel_limpo) == 11: # Celular (com nono dígito)
+    if len(tel_limpo) == 11: 
         return f"({tel_limpo[:2]}) {tel_limpo[2:7]}-{tel_limpo[7:]}"
-    elif len(tel_limpo) == 10: # Fixo
+    elif len(tel_limpo) == 10: 
         return f"({tel_limpo[:2]}) {tel_limpo[2:6]}-{tel_limpo[6:]}"
     return telefone
 
@@ -162,7 +163,6 @@ with col_tel:
 # --- SEÇÃO 2: CONDIÇÕES COMERCIAIS ---
 st.markdown("### 2. Condições Comerciais")
 
-# Primeira linha: Preço e Prazo
 col_valor, col_prazo = st.columns(2)
 with col_valor:
     valor_total = st.text_input("**Preço Total:**") 
@@ -176,7 +176,6 @@ with col_tipo:
 with col_meio:
     meio_pagamento = st.selectbox("**Meio de Pagamento:**", ["PIX", "Boleto", "Cartão de Crédito"])
 
-# Lógica condicional dinâmica para o texto
 texto_gerado_pagamento = ""
 
 if tipo_pagamento == "À vista":
@@ -200,8 +199,6 @@ else:
 
 st.markdown("<br>", unsafe_allow_html=True)
 st.info("💡 O texto abaixo foi gerado automaticamente, mas você pode editá-lo livremente antes de gerar o contrato.")
-
-# Caixa de texto final, preenchida pelo texto gerado, mas editável pelo usuário
 condicoes_pagamento = st.text_area("**Texto Final das Condições de Pagamento:**", value=texto_gerado_pagamento, height=100)
 
 # --- SEÇÃO 3: COMPOSIÇÃO DO BRINQUEDO ---
@@ -220,22 +217,11 @@ with col_pav:
     medida_pav = st.number_input("**Nº de Pavimentos:**", min_value=1, value=3, step=1)
 
 lista_atrativos = [
-    "Escorregador reto",
-    "Escorregador duplo",
-    "Escorregador tubular",
-    "Piscina de bolinhas",
-    "Pula pula",
-    "Sapateira",
-    "Cavalinho",
-    "Mesinha com cadeiras em MDF",
-    "Cenários",
-    "Cercado com portão",
-    "Socão",
-    "Bananinhas",
-    "Ponte de fitas",
-    "Meia lua",
-    "Labirinto de fitas",
-    "Bolinhas coloridas"
+    "Escorregador reto", "Escorregador duplo", "Escorregador tubular",
+    "Piscina de bolinhas", "Pula pula", "Sapateira", "Cavalinho",
+    "Mesinha com cadeiras em MDF", "Cenários", "Cercado com portão",
+    "Socão", "Bananinhas", "Ponte de fitas", "Meia lua",
+    "Labirinto de fitas", "Bolinhas coloridas"
 ]
 
 itens_selecionados = st.multiselect("**Selecione os atrativos e obstáculos que compõem o projeto:**", lista_atrativos)
@@ -250,9 +236,16 @@ if itens_selecionados:
             qtd = st.number_input(f"**Qtd: {item}**", min_value=1, value=1, key=f"qtd_{item}")
             quantidades_itens[item] = qtd
 
-# --- SEÇÃO 4: GERAÇÃO DO CONTRATO ---
+# --- SEÇÃO 4: ANEXOS DO PROJETO ---
 st.markdown("---")
-st.markdown("### 4. Geração do Contrato")
+st.markdown("### 4. Anexos do Projeto")
+st.info("🖼️ Você pode anexar uma imagem 3D ou planta do projeto. Ela será inserida no final do contrato.")
+imagem_upload = st.file_uploader("**Selecione a imagem (Opcional):**", type=["png", "jpg", "jpeg"])
+
+
+# --- SEÇÃO 5: GERAÇÃO DO CONTRATO ---
+st.markdown("---")
+st.markdown("### 5. Geração do Contrato")
 
 formato_saida = st.radio("**Escolha o formato do arquivo:**", ["Word (.docx)", "PDF (.pdf)"], horizontal=True)
 
@@ -286,6 +279,12 @@ if st.button("📝 Gerar e Baixar Contrato", type="primary"):
 
         doc = DocxTemplate("contrato.docx")
         
+        # Processa a imagem se o usuário tiver feito upload
+        imagem_processada = ""
+        if imagem_upload is not None:
+            # InlineImage insere a imagem redimensionando para 150 milímetros de largura
+            imagem_processada = InlineImage(doc, imagem_upload, width=Mm(150))
+        
         contexto = {
             "CNPJ": formatar_cnpj(st.session_state.cnpj_input) or "",
             "NOME_EMPRESARIAL": st.session_state.razao_social or "",
@@ -301,7 +300,8 @@ if st.button("📝 Gerar e Baixar Contrato", type="primary"):
             "CONDICOES_PAGAMENTO": condicoes_pagamento or "",
             "PRAZO_ENTREGA": f"{prazo_entrega} ({num2words(prazo_entrega, lang='pt_BR')})",
             "DESCRICAO_PRODUTO": texto_descricao or "",
-            "DATA_CONTRATO": data_por_extenso() 
+            "DATA_CONTRATO": data_por_extenso(),
+            "IMAGEM_PROJETO": imagem_processada  # <--- Nova variável de imagem injetada aqui
         }
         
         doc.render(contexto)
