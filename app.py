@@ -299,7 +299,7 @@ if st.button("📝 Gerar e Baixar Contrato", type="primary"):
             "VALOR_TOTAL": formatar_moeda(valor_total) or "",
             "VALOR_EXTENSO": valor_por_extenso(valor_total) or "",
             "CONDICOES_PAGAMENTO": condicoes_pagamento or "",
-            "PRAZO_ENTREGA": str(prazo_entrega),
+            "PRAZO_ENTREGA": f"{prazo_entrega} ({num2words(prazo_entrega, lang='pt_BR')})",
             "DESCRICAO_PRODUTO": texto_descricao or "",
             "DATA_CONTRATO": data_por_extenso() 
         }
